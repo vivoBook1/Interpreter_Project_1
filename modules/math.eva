@@ -1,0 +1,18 @@
+
+
+(def sq (value)
+  (* value value) )
+
+(def abs (value)
+  (if (< value 0)
+      (- value)
+      value))
+
+
+
+(def square (x)
+  (* x x))
+
+(var MAX_VALUE 1000) 
+
+(exports math sq abs MAX_VALUE)
