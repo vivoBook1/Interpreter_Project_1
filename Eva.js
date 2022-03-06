@@ -321,7 +321,8 @@ if(exp[0] === '/=') {
             const classEnv = this.eval(exp[1], env);
 
             // An instance of a class in an environment
-            // The 'parent' compoenet of an the instance environment is set to its class
+            // The 'parent' compoenet of an the instance environment is 
+            //set to its class
 
             const instanceEnv = new Environment({}, classEnv);
 
