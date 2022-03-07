@@ -8,7 +8,7 @@ const Environment = require('./Environment');
 const { env } = require('process');
 const { isString } = require('util');
 
-const Transformer = require('./transform/Transformer');
+const Transformer = require('./Transformers');
 
 const evaParser = require('./parser/evaParser');
 
@@ -97,7 +97,6 @@ class Eva {
 
         */
 
-
 //------------------------------------------------------------------------------
 // Block: Evaluating expressions:
 
@@ -177,7 +176,7 @@ class Eva {
 
         if(exp[0] === 'def') {
 
-            // JIT - transpile to a variable decelaration
+            // JIT - transpile to a variable declaration
 
             const varExp = this._transformer.transformDefToLambda(exp);
 
@@ -207,74 +206,74 @@ class Eva {
             return this.eval(whileExp, env);
         } 
 
-//-----------------------------------------------------------------------------------------
-// increment opeartion:
-//
-// Syntactic Sugar for setting a value:
+    //-----------------------------------------------------------------------------------------
+    // increment opeartion:
+    //
+    // Syntactic Sugar for setting a value:
 
-if(exp[0] === '++') {
-    const setExp = this._transformer.transformIncToSet(exp);
+    if(exp[0] === '++') {
+        const setExp = this._transformer.transformIncToSet(exp);
 
-    return this.eval(setExp, env);
-}
+        return this.eval(setExp, env);
+    }
 
-//-----------------------------------------------------------------------------------------
-// decrement opeartion:
-//
-// Syntactic Sugar for setting a value:
+    //-----------------------------------------------------------------------------------------
+    // decrement opeartion:
+    //
+    // Syntactic Sugar for setting a value:
 
-if(exp[0] === '--') {
-    const setExp = this._transformer.transformDecToSet(exp);
+    if(exp[0] === '--') {
+        const setExp = this._transformer.transformDecToSet(exp);
 
-    return this.eval(setExp, env);
-}
+        return this.eval(setExp, env);
+    }
 
-//-----------------------------------------------------------------------------------------
-// Short-hand + opeartion:
-//
-// Syntactic Sugar for setting a value:
+    //-----------------------------------------------------------------------------------------
+    // Short-hand + opeartion:
+    //
+    // Syntactic Sugar for setting a value:
 
-if(exp[0] === '+=') {
-    const setExp = this._transformer.transformIncValToSet(exp);
+    if(exp[0] === '+=') {
+        const setExp = this._transformer.transformIncValToSet(exp);
 
-    return this.eval(setExp, env);
-}
+        return this.eval(setExp, env);
+    }
 
-//-----------------------------------------------------------------------------------------
-// Short-hand - opeartion:
-//
-// Syntactic Sugar for setting a value:
+    //-----------------------------------------------------------------------------------------
+    // Short-hand - opeartion:
+    //
+    // Syntactic Sugar for setting a value:
 
-if(exp[0] === '-=') {
-    const setExp = this._transformer.transformDecValToSet(exp);
+    if(exp[0] === '-=') {
+        const setExp = this._transformer.transformDecValToSet(exp);
 
-    return this.eval(setExp, env);
-}
+        return this.eval(setExp, env);
+    }
 
-//-----------------------------------------------------------------------------------------
-// Short-hand * opeartion:
-//
-// Syntactic Sugar for setting a value:
+    //-----------------------------------------------------------------------------------------
+    // Short-hand * opeartion:
+    //
+    // Syntactic Sugar for setting a value:
 
-if(exp[0] === '*=') {
-    const setExp = this._transformer.transformMulValToSet(exp);
+    if(exp[0] === '*=') {
+        const setExp = this._transformer.transformMulValToSet(exp);
 
-    return this.eval(setExp, env);
-}
+        return this.eval(setExp, env);
+    }
 
-//-----------------------------------------------------------------------------------------
-// Short-hand / opeartion:
-//
-// Syntactic Sugar for setting a value:
+    //-----------------------------------------------------------------------------------------
+    // Short-hand / opeartion:
+    //
+    // Syntactic Sugar for setting a value:
 
-if(exp[0] === '/=') {
-    const setExp = this._transformer.transformDivValToSet(exp);
+    if(exp[0] === '/=') {
+        const setExp = this._transformer.transformDivValToSet(exp);
 
-    return this.eval(setExp, env);
-}
+        return this.eval(setExp, env);
+    }
 
-//----------------------------------------------------------------------------------------
-// Lambda functions:
+    //----------------------------------------------------------------------------------------
+    // Lambda functions:
 
         if(exp[0] === 'lambda') {
             const [_tag, params, body] = exp;
@@ -285,6 +284,32 @@ if(exp[0] === '/=') {
                 env, //Closure
             };
         }
+
+        // Array/List decelaration:
+
+        if(exp[0] === 'list') {
+            const [_tag, name, elements] = exp;
+            
+            for(let i = 0; i < elements.length; i++) {
+
+                if(this.isVariableName(elements[i])) {
+                    elements[i] = this.eval(elements[i], env);
+                }
+
+            }
+
+            return env.define(name, elements);
+        } 
+
+        // Accessing an element of an array/list: (arr -> 3) --- accesing element at index 3 of arr.
+       if(exp[1] === '->') {
+
+        const ListArr = this.eval(exp[0], env);
+
+        const id = this.eval(exp[2], env);
+
+        return this.eval(ListArr[id], env);
+    }
 
 //-----------------------------------------------------------------------------------------
 // Class Decelarations:
@@ -567,6 +592,10 @@ const GlobalEnvironment = new Environment({
     },
 
     '/'(op1, op2) {
+        if(op2 === 0)
+        {
+            throw `Error division by zero.`
+        }
         return op1 / op2;
     },
 
@@ -594,6 +623,10 @@ const GlobalEnvironment = new Environment({
 
     '=='(op1, op2) {
         return op1 === op2;
+    },
+
+    '='(op1, op2) {
+        return op1 == op2;
     },
 
     // Console ouptut
