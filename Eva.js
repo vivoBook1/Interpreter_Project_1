@@ -370,14 +370,6 @@ class Eva {
 
             return instanceEnv.lookup(name);
 
-            /* This probably returns an object generated from the return statement of lambda function
-            like {params, body, env}.
-            this whole object is given in return to probably the isArray part as exp[0]
-            the other part is the argument which is passed i.e. exp[1] and remaining.
-            eg. this is the expression which probably led to all this
-            eg. 1) ((prop p calc) p)  ----- Class-test
-            eg. 2) ((prop math abs) (- 10)) ------ import-test
-            */
         }
  
 //-----------------------------------------------------------------------------------------
@@ -409,10 +401,6 @@ class Eva {
             if(exp.length == 2) {
 
             const [_tag, name] = exp;
-
-          /*  if((this.global).record.hasOwnProperty(name)) {
-                return;
-            } */ // Caching layer. (check if correct implementation)
 
             const moduleSrc = fs.readFileSync(`${__dirname}/modules/${name}.eva`, 'utf-8',);
 
@@ -451,17 +439,8 @@ class Eva {
                 env.define(funa, fenv.lookup(funa));
                 // (this.global).define(funa, fenv.lookup(funa)); --- this one or upper one, see which one is correct.
             });       
-            
-        // Optimize this whole block
 
             return env.define(name, barbadiEnv);
-
-          /* funm.forEach(funa => {
-                env.define(funa, fenv.lookup(funa));
-                // (this.global).define(funa, fenv.lookup(funa)); --- this one or upper one, see which one is correct.
-            }); */
-        
-            //return;
     }
 
 //-----------------------------------------------------------------------------------------
